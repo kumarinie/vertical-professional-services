@@ -129,11 +129,11 @@ class AccountMove(models.Model):
             result[field] = invoice[field]
         return result
 
-    def _get_name_invoice_report(self):
+    def _is_project_invoice(self):
         """ This method need to be inherit by the localizations if they want to print a custom invoice report instead of
         the default one. For example please review the l10n_ar module """
         self.ensure_one()
         ps_invoice_id = self.invoice_line_ids.mapped("ps_invoice_id")
         if ps_invoice_id:
-            return 'ps_account.report_invoice_document_ps_account'
-        return 'account.report_invoice_document'
+            return True
+        return False
