@@ -142,5 +142,10 @@ class AccountMoveLine(models.Model):
     _inherit = "account.move.line"
 
     def get_analytic_project(self):
-        project = self.env['project.project'].search([('analytic_account_id', '=', self.analytic_account_id.id)])
-        return project and project.name or self.name
+        aa = (self.analytic_distribution or {}).keys()
+        if aa:
+           analytic_id = list(aa)[0]
+           project = self.env['project.project'].search([('analytic_account_id', '=', analytic_id)])
+           return project and project.name or self.name
+        return self.name
+
