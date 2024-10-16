@@ -53,7 +53,7 @@
                                     </td>
                                     <td class="text-start">
                                         <t t-set="project_name" t-value="line.get_analytic_project()" />
-                                        <span t-field="project_name"/>
+                                        <span t-esc="project_name"/>
                                     </td>
 
                                 </t>
