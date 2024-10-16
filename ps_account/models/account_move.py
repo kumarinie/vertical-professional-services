@@ -137,3 +137,10 @@ class AccountMove(models.Model):
         if ps_invoice_id:
             return True
         return False
+
+class AccountMoveLine(models.Model):
+    _inherit = "account.move.line"
+
+    def get_analytic_project(self):
+        project = self.env['project.project'].search([('analytic_account_id', '=', self.analytic_account_id.id)])
+        return project and project.name or self.name

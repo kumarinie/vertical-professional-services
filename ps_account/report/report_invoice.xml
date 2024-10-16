@@ -8,16 +8,15 @@
                     <thead>
                         <tr>
                             <th name="th_description" class="text-start"><span>Description</span></th>
-                            <!--<th name="th_quantity" class="text-end"><span>Quantity</span></th>-->
-                            <th name="th_priceunit" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Unit Price</span></th>
-                            <!--<th name="th_price_unit" t-if="display_discount" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">-->
-                                <!--<span>Disc.%</span>-->
-                            <!--</th>-->
-                            <th name="th_taxes" t-attf-class="text-start {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Taxes</span></th>
                             <th name="th_subtotal" class="text-end">
                                 <span groups="account.group_show_line_subtotals_tax_excluded">Amount</span>
                                 <span groups="account.group_show_line_subtotals_tax_included">Total Price</span>
                             </th>
+                            <!--<th name="th_price_unit" t-if="display_discount" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">-->
+                                <!--<span>Disc.%</span>-->
+                            <!--</th>-->
+                            <th name="th_taxes" t-attf-class="text-start {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Taxes</span></th>
+                            <th name="th_projectname" t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}"><span>Project Name</span></th>
                         </tr>
                     </thead>
                 </t>
@@ -50,10 +49,11 @@
                             <tr t-att-class="'bg-200 fw-bold o_line_section' if line.display_type == 'line_section' else 'fst-italic o_line_note' if line.display_type == 'line_note' else ''">
                                 <t t-if="line.display_type == 'product'" name="account_invoice_line_accountable">
                                     <td name="account_invoice_line_name"><span t-field="line.name" t-options="{'widget': 'text'}"/></td>
-                                    <!--<td class="text-end">
-                                        <span t-field="line.quantity"/>
-                                        <span t-field="line.product_uom_id"  groups="uom.group_uom"/>
-                                    </td>-->
+                                    <td class="text-end o_price_total">
+                                        <span class="text-nowrap" t-field="line.price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
+                                        <span class="text-nowrap" t-field="line.price_total" groups="account.group_show_line_subtotals_tax_included"/>
+                                    </td>
+
                                     <td t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
                                         <span class="text-nowrap" t-field="line.price_unit"/>
                                     </td>
@@ -63,10 +63,12 @@
                                     <td t-attf-class="text-start {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
                                         <span t-esc="', '.join(map(lambda x: (x.description or x.name), line.tax_ids))" id="line_tax_ids"/>
                                     </td>
-                                    <td class="text-end o_price_total">
-                                        <span class="text-nowrap" t-field="line.price_subtotal" groups="account.group_show_line_subtotals_tax_excluded"/>
-                                        <span class="text-nowrap" t-field="line.price_total" groups="account.group_show_line_subtotals_tax_included"/>
+                                    <td class="text-end">
+                                        <t t-set="project_name" t-value="line.get_analytic_project()" />
+                                        <span t-field="project_name"
+                                                />
                                     </td>
+
                                 </t>
                                 <t t-if="line.display_type == 'line_section'">
                                     <td colspan="99">
