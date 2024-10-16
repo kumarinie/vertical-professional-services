@@ -124,7 +124,7 @@
                 </tbody>
             </table>
         </xpath>
-        <xpath expr="//div[last()]" position="after">
+        <xpath expr="//div[@class='page']" position="after">
             <t
                 t-set="analytic_invoice_id"
                 t-value="o.invoice_line_ids.mapped('ps_invoice_id')"
@@ -436,6 +436,9 @@
                                                         <span
                                                             t-field="proLines.analytic_account_related.name"
                                                         />
+                                                    </td>
+                                                    <td style="border-top:none;" width="20%">
+                                                        <span t-field="line.name"/>
                                                     </td>
                                                     <!--<td style='border-top:none;' class="text-right" width="30%">
                                                 <span t-field="line.jira_issue_type"></span>

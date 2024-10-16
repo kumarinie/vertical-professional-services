@@ -20,6 +20,7 @@
             </xpath>
             <group name="specs" position="inside">
                 <field name="specs_on_task_level" />
+                <field name="print_description_or_task_name"/>
             </group>
         </field>
     </record>
