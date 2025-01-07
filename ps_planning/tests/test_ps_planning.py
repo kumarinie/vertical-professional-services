@@ -100,7 +100,7 @@ class TestPsPlanning(TransactionCase):
         planned_line = self.project.ps_contracted_line_ids.planning_line_ids.filtered(
             lambda x: x.line_type == "planned"
         )
-        self.assertEqual(len(planned_line), 1)
+        self.assertEqual(len(planned_line), 5)
         contracted_line = planned_line.contracted_line_id
 
         self.project.ps_contracted_line_ids.filtered(

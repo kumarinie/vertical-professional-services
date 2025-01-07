@@ -11,9 +11,9 @@
                 <field name="project_user_id" optional="hidden" />
                 <field name="task_id" options="{'no_create': true}" />
                 <field name="product_id" options="{'no_create': true}" />
-                <field name="days" required="True" />
-                <field name="rate" required="True" />
-                <field name="value" required="True" />
+                <field name="days" required="True" digits="[16, 1]" />
+                <field name="rate" required="True" digits="[16, 0]" />
+                <field name="value" required="True" digits="[16, 0]" />
                 <field name="date_from" required="True" />
                 <field name="date_to" required="True" />
             </tree>
@@ -29,10 +29,28 @@
                     string="My projects"
                     domain="[('project_id.user_id', '=', uid)]"
                 />
+                <separator />
                 <filter
                     name="with_period"
                     string="With period"
                     domain="[('range_id', '!=', False)]"
+                />
+                <separator />
+                <filter
+                    name="with_value"
+                    string="With value"
+                    domain="[('value', '!=', False), ('value', '!=', 0)]"
+                />
+                <separator />
+                <filter
+                    name="invoicing_time_material"
+                    string="Time &amp; Material Projects"
+                    domain="[('project_id.invoice_properties.actual_time_spent', '=', True)]"
+                />
+                <filter
+                    name="invoicing_fixed"
+                    string="Fixed Price Projects"
+                    domain="[('project_id.invoice_properties.fixed_amount', '=', True)]"
                 />
                 <group expand="0" string="Group By">
                     <filter
@@ -70,6 +88,8 @@
         <field name="name">Contract Overview</field>
         <field name="res_model">ps.contracted.line</field>
         <field name="view_mode">tree,pivot</field>
-        <field name="context">{'search_default_my': 1}</field>
+        <field name="context">
+            {'search_default_my': 1, 'search_default_with_value': 1}
+        </field>
     </record>
 </odoo>

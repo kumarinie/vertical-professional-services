@@ -8,6 +8,7 @@ from odoo import _, fields, models, tools
 
 class PsTimeLinePlanningReport(models.Model):
     _name = "ps.time.line.planning.report"
+    _inherit = "ps.planning.department.mixin"
     _description = "Activity Analysis (Contracted / Planned / Actual)"
     _auto = False
 
@@ -18,6 +19,7 @@ class PsTimeLinePlanningReport(models.Model):
     days_actual = fields.Float()
     days_planned = fields.Float()
     days_contracted = fields.Float()
+    rate = fields.Float(group_operator="max")
 
     def init(self):
         tools.drop_view_if_exists(self._cr, self._table)
@@ -32,7 +34,8 @@ class PsTimeLinePlanningReport(models.Model):
                 date,
                 unit_amount / 8 as days_actual,
                 0 as days_planned,
-                0 as days_contracted
+                0 as days_contracted,
+                0 as rate
             FROM ps_time_line
             UNION (
             WITH
@@ -53,16 +56,19 @@ class PsTimeLinePlanningReport(models.Model):
                 SELECT count(month_day) work_days, range_id FROM work_days GROUP BY range_id
             )
             SELECT
-                id,
-                project_id,
-                task_id,
+                ps_planning_line.id,
+                ps_planning_line.project_id,
+                ps_planning_line.task_id,
                 employee_id,
                 work_days.month_day,
                 0 as days_actual,
                 0 as days_planned,
-                days / work_day_count.work_days as days_contracted
-            FROM ps_planning_line, work_days, work_day_count
+                ps_planning_line.days / work_day_count.work_days as days_contracted,
+                ps_contracted_line.rate as rate
+            FROM ps_planning_line, ps_contracted_line, work_days, work_day_count
             WHERE
+            ps_planning_line.contracted_line_id=ps_contracted_line.id
+            AND
             ps_planning_line.range_id=work_days.range_id
             AND
             ps_planning_line.range_id=work_day_count.range_id
@@ -70,16 +76,19 @@ class PsTimeLinePlanningReport(models.Model):
             ps_planning_line.line_type='contracted'
             UNION
             SELECT
-                id,
-                project_id,
-                task_id,
+                ps_planning_line.id,
+                ps_planning_line.project_id,
+                ps_planning_line.task_id,
                 employee_id,
                 work_days.month_day,
                 0 as days_actual,
-                days / work_day_count.work_days as days_planned,
-                0 as days_contracted
-            FROM ps_planning_line, work_days, work_day_count
+                ps_planning_line.days / work_day_count.work_days as days_planned,
+                0 as days_contracted,
+                ps_contracted_line.rate as rate
+            FROM ps_planning_line, ps_contracted_line, work_days, work_day_count
             WHERE
+            ps_planning_line.contracted_line_id=ps_contracted_line.id
+            AND
             ps_planning_line.range_id=work_days.range_id
             AND
             ps_planning_line.range_id=work_day_count.range_id

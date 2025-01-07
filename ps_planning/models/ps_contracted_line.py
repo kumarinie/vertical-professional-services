@@ -1,6 +1,7 @@
 # Copyright 2024 Hunki Enterprises BV
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl-3.0)
 
+
 from dateutil.relativedelta import SA, SU, relativedelta
 
 from odoo import _, api, fields, models, tools
@@ -9,6 +10,7 @@ from odoo.exceptions import UserError, ValidationError
 
 class PsContractedLine(models.Model):
     _name = "ps.contracted.line"
+    _inherit = "ps.planning.department.mixin"
     _description = "Contracted entry"
     _order = "project_id, task_id, product_id"
 
@@ -38,9 +40,8 @@ class PsContractedLine(models.Model):
     date_to = fields.Date()
     days = fields.Float()
     range_id = fields.Many2one("date.range", copy=False)
-    rate = fields.Monetary(currency_field="currency_id")
+    rate = fields.Monetary(currency_field="currency_id", group_operator="avg")
     value = fields.Monetary(currency_field="currency_id")
-    # TODO compute from project.partner_id? company?
     currency_id = fields.Many2one(
         "res.currency", default=lambda self: self.env.company.currency_id
     )
@@ -135,6 +136,13 @@ class PsContractedLine(models.Model):
             if this.task_id and not this.task_id & this.project_id.task_ids:
                 raise UserError(_("Select a task from the chosen project"))
 
+    def onchange(self, values, field_name, field_onchange):
+        """Avoid recomutation loop when setting value, which sets rate, recomputing value"""
+        result = super().onchange(values, field_name, field_onchange)
+        if field_name == "value":
+            result.get("value", {}).pop("value", False)
+        return result
+
     @api.onchange("days", "rate")
     def _onchange_days(self):
         if self.days and self.rate:
@@ -152,10 +160,10 @@ class PsContractedLine(models.Model):
     def _onchange_project_id(self):
         self.task_id = False
 
+    @api.model_create_multi
     def create(self, vals):
         result = super().create(vals)
-        if "date_from" in vals or "date_to" in vals:
-            result._create_or_assign_date_range()
+        result._create_or_assign_date_range()
         return result
 
     def write(self, vals):

@@ -38,7 +38,7 @@ class PsPlanningWizard(models.TransientModel):
     def _compute_contracted_line_ids(self):
         for this in self:
             this.contracted_line_ids = this.project_id.ps_contracted_line_ids.filtered(
-                lambda x: x.value and x.range_id == this.period_id
+                lambda x: x.range_id == this.period_id
             )
 
     @api.depends("contracted_line_ids")
@@ -50,6 +50,10 @@ class PsPlanningWizard(models.TransientModel):
         self.available_product_ids = self.contracted_line_ids.filtered(
             lambda x: x.task_id == self.add_line_task_id
         ).mapped("product_id")
+
+    @api.onchange("project_id")
+    def _onchange_project_id(self):
+        self.period_id = False
 
     @api.onchange("add_line_task_id")
     def _onchange_add_line_employee_id(self):
@@ -191,9 +195,6 @@ class PsPlanningWizard(models.TransientModel):
 
     def action_commit_planning(self):
         for line in self.line_ids:
-            if not line.days:
-                line.planning_line_id.unlink()
-                continue
             if line.planning_line_id:
                 line.planning_line_id.write({"days": line.days, "state": line.state})
             else:

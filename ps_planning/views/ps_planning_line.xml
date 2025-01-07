@@ -20,6 +20,10 @@
         <field name="arch" type="xml">
             <search>
                 <field name="project_id" />
+                <field
+                    name="range_id"
+                    domain="[('type_id', '=', %(account_fiscal_month.date_range_fiscal_month)s)]"
+                />
                 <filter
                     name="my"
                     string="My projects"
@@ -27,10 +31,24 @@
                 />
                 <separator />
                 <filter
+                    name="invoicing_time_material"
+                    string="Time &amp; Material Projects"
+                    domain="[('project_id.invoice_properties.actual_time_spent', '=', True)]"
+                />
+                <filter
+                    name="invoicing_fixed"
+                    string="Fixed Price Projects"
+                    domain="[('project_id.invoice_properties.fixed_amount', '=', True)]"
+                />
+                <separator />
+                <filter
                     name="planned"
                     string="Planned"
                     domain="[('line_type', '=', 'planned')]"
                 />
+                <searchpanel>
+                    <field name="range_id" icon="fa-filter" limit="0" />
+                </searchpanel>
                 <group expand="0" string="Group By">
                     <filter
                         string="Project"

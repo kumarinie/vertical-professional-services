@@ -521,3 +521,7 @@
 .o_form_view .o_form_field_x2many_2d_matrix_ps_planning input[type="text"]:disabled {
     border: none;
 }
+
+.o_form_view .o_form_field_x2many_2d_matrix_ps_planning input[type="checkbox"] {
+    margin-right: 0.3em;
+}

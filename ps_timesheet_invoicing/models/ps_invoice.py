@@ -92,9 +92,10 @@ class PSInvoice(models.Model):
             self.task_user_ids = [(6, 0, task_user_ids)]
         else:
             self.task_user_ids = [(6, 0, [])]
-        # add user_total_lines already present in the invoice
+        # add user_total_lines already present in the invoice if they still have lines
         for total_line in user_total_invoiced_lines:
-            user_total_data.append((4, total_line.id))
+            if total_line.detail_ids:
+                user_total_data.append((4, total_line.id))
         self.user_total_ids = user_total_data
         if self.invoice_properties.actual_expenses and self.period_id:
             expense_domain = self._get_expense_line_ids_domain()
@@ -580,6 +581,7 @@ class PSInvoice(models.Model):
                     "quantity": quantity,
                     "product_uom_id": uom.id,
                     "user_id": user.id,
+                    "operating_unit_id": user and user._get_operating_unit_id().id,
                 }
             )
         )
@@ -628,6 +630,7 @@ class PSInvoice(models.Model):
                     "quantity": 1,
                     "price_unit": -sum(self.expense_line_ids.mapped("amount")),
                     "ps_analytic_line_ids": [(6, 0, self.expense_line_ids.ids)],
+                    "operating_unit_id": self.operating_unit_id.id,
                 }
             ]
             if sum(self.expense_line_ids.mapped("amount"))

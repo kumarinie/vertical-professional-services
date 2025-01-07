@@ -6,6 +6,7 @@ from odoo import fields, models
 
 class PsPlanningLine(models.Model):
     _name = "ps.planning.line"
+    _inherit = "ps.planning.department.mixin"
     _description = "Planning entry"
     _order = "project_id, task_id, employee_id, range_id"
 
@@ -15,7 +16,7 @@ class PsPlanningLine(models.Model):
         required=True,
     )
     state = fields.Selection([("draft", "Draft"), ("final", "Final")], default="draft")
-    range_id = fields.Many2one("date.range", required=True)
+    range_id = fields.Many2one("date.range", string="Period", required=True)
     task_id = fields.Many2one("project.task", required=True)
     product_id = fields.Many2one("product.product", required=True)
     employee_id = fields.Many2one("hr.employee")

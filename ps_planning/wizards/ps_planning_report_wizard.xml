@@ -60,7 +60,7 @@
         </field>
     </record>
     <record id="action_ps_planning_report_wizard" model="ir.actions.act_window">
-        <field name="name">PS Planning report</field>
+        <field name="name">Planning report</field>
         <field name="res_model">ps.planning.report.wizard</field>
         <field name="view_mode">form</field>
         <field name="view_id" ref="view_ps_planning_report_wizard_form" />

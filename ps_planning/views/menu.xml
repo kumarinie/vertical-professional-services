@@ -2,8 +2,9 @@
     <menuitem
         id="planning_root"
         name="Contracting &amp; Planning"
-        parent="project.menu_main_pm"
+        web_icon="ps_planning,static/description/icon.png"
         groups="group_user"
+        action="action_ps_contracted_line"
         sequence="80"
     />
     <menuitem

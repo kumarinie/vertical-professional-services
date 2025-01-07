@@ -28,7 +28,7 @@ class AccountMoveLine(models.Model):
     @api.constrains("operating_unit_id", "analytic_account_id", "user_id")
     def _check_analytic_operating_unit(self):
         for rec in self.filtered("user_id"):
-            if not rec.operating_unit_id == rec.user_id._get_operating_unit_id():
+            if rec.operating_unit_id != rec.user_id._get_operating_unit_id():
                 raise UserError(
                     _(
                         "The Operating Unit in the"

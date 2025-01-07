@@ -55,6 +55,9 @@ odoo.define("ps_planning.web_widget_x2many_2d_matrix", function (require) {
         },
         _renderView: function () {
             var result = this._super();
+            if (!this.is_ps_planning) {
+                return result;
+            }
             this.$el.children("table").removeClass("table-striped");
             return result;
         },
@@ -177,6 +180,9 @@ odoo.define("ps_planning.web_widget_x2many_2d_matrix", function (require) {
         },
         _computeColumnAggregates: function () {
             this._super();
+            if (!this.is_ps_planning) {
+                return;
+            }
             this.total.aggregate.value = 0;
             this.total.aggregate.contracted_value = 0;
             var fname = this.matrix_data.field_value;
@@ -204,6 +210,9 @@ odoo.define("ps_planning.web_widget_x2many_2d_matrix", function (require) {
         },
         applyAggregateValue: function ($cell, axis) {
             this._super($cell, axis);
+            if (!this.is_ps_planning) {
+                return;
+            }
             if (axis.aggregate.contracted_value !== undefined) {
                 $cell.text(
                     String(field_utils.format.float(axis.aggregate.value)) +

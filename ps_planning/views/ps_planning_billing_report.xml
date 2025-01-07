@@ -21,11 +21,29 @@
         <field name="arch" type="xml">
             <search>
                 <field name="project_id" />
+                <field
+                    name="range_id"
+                    domain="[('type_id', '=', %(account_fiscal_month.date_range_fiscal_month)s)]"
+                />
                 <filter
                     name="my"
                     string="My projects"
                     domain="[('project_id.user_id', '=', uid)]"
                 />
+                <separator />
+                <filter
+                    name="invoicing_time_material"
+                    string="Time &amp; Material Projects"
+                    domain="[('project_id.invoice_properties.actual_time_spent', '=', True)]"
+                />
+                <filter
+                    name="invoicing_fixed"
+                    string="Fixed Price Projects"
+                    domain="[('project_id.invoice_properties.fixed_amount', '=', True)]"
+                />
+                <searchpanel>
+                    <field name="range_id" icon="fa-filter" limit="0" />
+                </searchpanel>
                 <group expand="0" string="Group By">
                     <filter
                         string="Project"
@@ -64,7 +82,7 @@
         </field>
     </record>
     <record id="action_ps_planning_billing_report" model="ir.actions.act_window">
-        <field name="name">PS Billing report</field>
+        <field name="name">Billing report</field>
         <field name="res_model">ps.planning.billing.report</field>
         <field name="view_mode">tree,pivot</field>
         <field name="context">{'search_default_my': 1}</field>

@@ -4,7 +4,7 @@
 {
     "name": "PS planning",
     "summary": "Planning tool for professional services",
-    "version": "14.0.1.0.0",
+    "version": "14.0.1.0.1",
     "development_status": "Alpha",
     "category": "Planning",
     "website": "http://www.tosc.nl",

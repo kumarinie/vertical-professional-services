@@ -1,11 +1,9 @@
 # Copyright 2024 Hunki Enterprises BV
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl-3.0)
 
-import json
 
-from lxml import etree
-
-from odoo import _, api, fields, models
+from odoo import _, fields, models
+from odoo.tools.misc import format_date
 
 
 class PsPlanningReportWizard(models.TransientModel):
@@ -73,7 +71,6 @@ class PsPlanningReportWizard(models.TransientModel):
                         ]
                     ).mapped(lambda x: x.unit_amount / 8)
                 ),
-                "budget_utilization": 42,
                 "actual_commercial_ytm": sum(
                     TimeLine.search(
                         [
@@ -106,12 +103,18 @@ class PsPlanningReportWizard(models.TransientModel):
                 - vals["days_planned_full_month"] * mtd_fraction,
                 days_actual_commercial_mtd=vals["days_actual_mtd"]
                 - vals["days_commercial_full_month"] * mtd_fraction,
+                budget_utilization=(
+                    vals["days_actual_mtd"] / vals["days_commercial_full_month"]
+                )
+                if vals["days_commercial_full_month"]
+                else 1,
             )
             Line.sudo().create(vals)
             i += 1
         return {
             "type": "ir.actions.act_window",
-            "name": _("PS Planning report"),
+            "name": _("Planning report %s")
+            % format_date(self.env, self.reference_date),
             "res_model": Line._name,
             "domain": [("wizard_id", "=", self.id)],
             "views": [(False, "list")],
@@ -122,6 +125,7 @@ class PsPlanningReportWizard(models.TransientModel):
 
 class PsPlanningReportWizardLine(models.TransientModel):
     _name = "ps.planning.report.wizard.line"
+    _inherit = "ps.planning.department.mixin"
     _description = "PS planning reporting wizard line"
     _rec_name = "project_name"
     _order = "sequence"
@@ -139,35 +143,6 @@ class PsPlanningReportWizardLine(models.TransientModel):
     days_actual_mtd = fields.Integer("MTD Actual MD")
     days_actual_planned_mtd = fields.Integer("MTD Actual - Planned MD")
     days_actual_commercial_mtd = fields.Integer("MTD Actual - Commercial MD")
-    budget_utilization = fields.Integer("KPI % MTD")
+    budget_utilization = fields.Float("KPI % MTD", digits=(16, 2))
     actual_commercial_ytm = fields.Integer("Actual Commercial YTM")
     manager_name = fields.Char("Project Manager")
-
-    @api.model
-    def _fields_view_get(
-        self, view_id=None, view_type="form", toolbar=False, submenu=False
-    ):
-        result = super()._fields_view_get(
-            view_id=view_id, view_type=view_type, toolbar=toolbar, submenu=submenu
-        )
-        if view_type == "search":
-            arch = etree.fromstring(result["arch"])
-            for node in arch.xpath("//search"):
-                etree.SubElement(
-                    node,
-                    "separator",
-                )
-                for department in self.env["hr.department"].search([]):
-                    etree.SubElement(
-                        node,
-                        "filter",
-                        attrib={
-                            "string": department.name,
-                            "domain": json.dumps(
-                                [("department_id", "=", department.id)]
-                            ),
-                        },
-                    )
-
-            result["arch"] = etree.tostring(arch)
-        return result

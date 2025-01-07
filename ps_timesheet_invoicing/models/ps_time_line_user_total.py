@@ -12,15 +12,15 @@ class TimelineUserTotal(models.Model):
     @api.depends("unit_amount", "user_id", "task_id", "ps_invoice_id.task_user_ids")
     def _compute_fee_rate(self):
         """
-            First, look get fee rate from task_user_ids from analytic invoice.
-            Else, get fee rate from method get_fee_rate()
+        First, look get fee rate from task_user_ids from analytic invoice.
+        Else, get fee rate from method get_fee_rate()
         :return:
         """
         task_user = self.env["task.user"]
-        # get task-user out of first ptline
         for this in self:
+            # get task-user out of first ptline
             ptline = this.detail_ids[:1]
-            task_user |= task_user.search(
+            task_user = task_user.search(
                 [
                     ("id", "in", this.ps_invoice_id.task_user_ids.ids),
                     ("task_id", "=", this.task_id.id),
@@ -35,12 +35,11 @@ class TimelineUserTotal(models.Model):
                 this.fee_rate = fr = task_user.fee_rate
                 this.ic_fee_rate = ic_fr = task_user.ic_fee_rate
             else:
-                this.fee_rate = fr = ptline.get_fee_rate(
+                rates = ptline.get_fee_rate(
                     this.task_id.id, this.user_id.id, ptline.date
-                )[0]
-                this.ic_fee_rate = ic_fr = ptline.get_fee_rate(
-                    this.task_id.id, this.user_id.id, ptline.date
-                )[1]
+                )
+                this.fee_rate = fr = rates[0]
+                this.ic_fee_rate = ic_fr = rates[1]
             this.amount = -this.unit_amount * fr
             this.ic_amount = -this.unit_amount * ic_fr
             this.effective_fee_rate = (
